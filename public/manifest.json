@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Readnote",
+  "description": "Read, translate, highlight, annotate, and save web notes to your own knowledge base.",
+  "version": "0.1.0",
+  "permissions": ["storage", "activeTab", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "icons": {
+    "16": "icon.svg",
+    "48": "icon.svg",
+    "128": "icon.svg"
+  },
+  "action": {
+    "default_title": "Readnote",
+    "default_icon": "icon.svg"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

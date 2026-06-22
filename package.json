@@ -1,0 +1,24 @@
+{
+  "name": "readnote",
+  "version": "0.1.0",
+  "description": "Local-first web reading notes, highlights, translation, and knowledge capture.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "build": "node scripts/build-extension.mjs",
+    "check": "tsc --noEmit",
+    "verify:extension": "npm run build && node scripts/check-extension-build.mjs",
+    "audit:secrets": "node scripts/audit-secrets.mjs",
+    "companion": "node scripts/companion-server.mjs"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.313",
+    "@types/node": "^25.9.3",
+    "typescript": "^5.8.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.9"
+  },
+  "dependencies": {
+    "undici": "^8.5.0"
+  }
+}

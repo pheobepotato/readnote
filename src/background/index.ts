@@ -1,7 +1,9 @@
+import { runExtensionTask } from "../shared/extension-lifecycle";
+
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id == null) {
     return;
   }
 
-  void chrome.tabs.sendMessage(tab.id, { type: "rk:translate-page" });
+  runExtensionTask(() => chrome.tabs.sendMessage(tab.id as number, { type: "rk:translate-page" }));
 });

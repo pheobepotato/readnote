@@ -16,6 +16,7 @@ import {
   saveSource,
   saveTranslations
 } from "../shared/storage";
+import { runExtensionTask } from "../shared/extension-lifecycle";
 import type { AnnotationRecord, AnnotationStyle, ExcerptRecord, SourceRecord, TranslationRecord } from "../shared/types";
 import { computeToolbarPosition, type RectLike } from "./positioning";
 import { annotationClassName, orderAnnotationsForRendering, type AnnotationClassOptions } from "./rendering";
@@ -368,7 +369,7 @@ function showToolbarForSelection(): void {
   for (const style of ["yellow", "blue", "pink"] as const) {
     const control = button("rk-tool", style, colorDot(style));
     control.addEventListener("click", () => {
-      void toggleStyleForSelection(style);
+      runExtensionTask(() => toggleStyleForSelection(style));
     });
     toolbar.append(control);
   }
@@ -378,33 +379,33 @@ function showToolbarForSelection(): void {
   const underline = button("rk-tool", "Underline", "U");
   underline.classList.add("rk-underline-tool");
   underline.addEventListener("click", () => {
-    void toggleStyleForSelection("underline");
+    runExtensionTask(() => toggleStyleForSelection("underline"));
   });
   toolbar.append(underline);
 
   const wavy = button("rk-tool rk-wavy-tool", "Wavy underline", wavyIcon());
   wavy.addEventListener("click", () => {
-    void toggleStyleForSelection("wavy");
+    runExtensionTask(() => toggleStyleForSelection("wavy"));
   });
   toolbar.append(wavy, divider());
 
   const note = button("rk-tool rk-pen-tool", "Note", "✎");
   note.addEventListener("click", () => {
     if (pendingSelectionRect) {
-      void showNoteEditor(null, pendingSelectionRect);
+      runExtensionTask(() => showNoteEditor(null, pendingSelectionRect as RectLike));
     }
   });
   toolbar.append(note);
 
   const clear = button("rk-tool rk-clear-tool", "Clear selected", eraserIcon());
   clear.addEventListener("click", () => {
-    void clearAnnotationForSelection();
+    runExtensionTask(clearAnnotationForSelection);
   });
   toolbar.append(clear);
 
   const save = button("rk-save-tool", "Save excerpt", "Save");
   save.addEventListener("click", () => {
-    void saveExcerptFromSelection();
+    runExtensionTask(saveExcerptFromSelection);
   });
   toolbar.append(save);
 
@@ -509,7 +510,7 @@ function discardPendingNoteDraft(): void {
   }
 
   pendingNoteDraft = null;
-  void rerenderCurrentAnnotations();
+  runExtensionTask(rerenderCurrentAnnotations);
 }
 
 async function deleteNoteFromAnnotation(annotation: AnnotationRecord): Promise<void> {
@@ -546,12 +547,12 @@ function showNotePanel(annotation: AnnotationRecord, rect: RectLike | DOMRect): 
 
   const edit = button("rk-note-panel-button", "Edit note", "✎");
   edit.addEventListener("click", () => {
-    void showNoteEditor(normalized, normalizedRect);
+    runExtensionTask(() => showNoteEditor(normalized, normalizedRect));
   });
 
   const remove = button("rk-note-panel-button rk-note-panel-delete", "Delete note", "⌫");
   remove.addEventListener("click", () => {
-    void deleteNoteFromAnnotation(normalized);
+    runExtensionTask(() => deleteNoteFromAnnotation(normalized));
   });
 
   actions.append(edit, remove);
@@ -582,7 +583,7 @@ async function showNoteEditor(annotation: AnnotationRecord | null, rect: RectLik
   done.type = "button";
   done.textContent = "Done";
   done.addEventListener("click", () => {
-    void (async () => {
+    runExtensionTask(async () => {
       if (draft) {
         const existing = await findStoredAnnotation(draft);
         await saveOrDeleteAnnotation({
@@ -604,7 +605,7 @@ async function showNoteEditor(annotation: AnnotationRecord | null, rect: RectLik
       pendingNoteDraft = null;
       await rerenderCurrentAnnotations();
       resetPendingSelection();
-    })();
+    });
   });
 
   noteEditor.append(textarea, done);
@@ -874,7 +875,7 @@ function injectPageActions(): void {
   translate.className = "rk-translate-button";
   translate.textContent = "Translate";
   translate.addEventListener("click", () => {
-    void translatePage();
+    runExtensionTask(translatePage);
   });
 
   const clearAll = document.createElement("button");
@@ -882,7 +883,7 @@ function injectPageActions(): void {
   clearAll.className = "rk-clear-all-button";
   clearAll.textContent = "Clear all";
   clearAll.addEventListener("click", () => {
-    void clearAllAnnotationsForCurrentPage();
+    runExtensionTask(clearAllAnnotationsForCurrentPage);
   });
 
   actions.append(translate, clearAll);
@@ -940,9 +941,9 @@ async function bootstrap(): Promise<void> {
   }, { passive: true });
   chrome.runtime.onMessage.addListener((message) => {
     if (message?.type === "rk:translate-page") {
-      void translatePage();
+      runExtensionTask(translatePage);
     }
   });
 }
 
-void bootstrap();
+runExtensionTask(bootstrap);

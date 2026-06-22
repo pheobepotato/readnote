@@ -1,6 +1,6 @@
 {
   "name": "readnote",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local-first web reading notes, highlights, translation, and knowledge capture.",
   "type": "module",
   "scripts": {
